@@ -43,12 +43,12 @@ namespace hpx { namespace util
     class HPX_EXPORT polymorphic_factory
     {
     public:
-        typedef boost::shared_ptr<Base>(*ctor_type)();
+        typedef Base *(*ctor_type)();
         typedef std::multimap<
             boost::uint32_t, std::pair<std::string, ctor_type>
         > ctor_map;
 
-        static boost::shared_ptr<Base> create(std::string const & name);
+        static Base *create(std::string const & name);
 
     protected:
         typename ctor_map::const_iterator locate(boost::uint32_t hash,

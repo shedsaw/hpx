@@ -51,7 +51,7 @@ namespace hpx { namespace util
     }
 
     template <typename Base>
-    boost::shared_ptr<Base> polymorphic_factory<Base>::create(
+    Base *polymorphic_factory<Base>::create(
         std::string const & name)
     {
         polymorphic_factory const & factory = polymorphic_factory::get_instance();
@@ -67,7 +67,7 @@ namespace hpx { namespace util
         HPX_THROW_EXCEPTION(bad_action_code
             , "polymorphic_factory::create"
             , error);
-        return boost::shared_ptr<Base>();
+        return 0;
     }
 
     template <typename Base>

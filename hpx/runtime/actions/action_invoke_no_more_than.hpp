@@ -140,8 +140,8 @@ namespace hpx { namespace actions { namespace detail
         typedef typed_continuation<result_type> base_type;
 
     public:
-        wrapped_continuation(continuation_type& cont)
-          : cont_(cont)
+        wrapped_continuation(std::unique_ptr<continuation> cont)
+          : cont_(std::move(cont))
         {}
 
         void trigger() const
@@ -188,7 +188,7 @@ namespace hpx { namespace actions { namespace detail
         }
 
     private:
-        continuation_type cont_;
+        std::unique_ptr<continuation> cont_;
     };
 
     ///////////////////////////////////////////////////////////////////////////
@@ -218,14 +218,14 @@ namespace hpx { namespace actions { namespace detail
         static bool call(Continuation& c, boost::mpl::true_)
         {
             Continuation cont(
-                boost::make_shared<wrapped_continuation<Action, N> >(c)
+                new wrapped_continuation<Action, N> >(std::move(c))
             );
-            c = cont;
+            c = std::move(cont);
             return true;
         }
 
         ///////////////////////////////////////////////////////////////////////
-        static bool call(hpx::actions::continuation_type& cont)
+        static bool call(std::unique_ptr<hpx::actions::continuation>& cont)
         {
             typedef typename Action::result_type result_type;
             typedef typename traits::is_future<result_type>::type is_future;

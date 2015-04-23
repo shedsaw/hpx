@@ -44,7 +44,7 @@ namespace hpx { namespace detail
 }}
 
 #define HPX_REGISTER_ASYNC_COLOCATED_DECLARATION(Action, Name)                \
-    HPX_UTIL_REGISTER_FUNCTION_DECLARATION(                                   \
+    HPX_UTIL_REGISTER_UNIQUE_FUNCTION_DECLARATION(                            \
         void (hpx::naming::id_type, hpx::agas::response)                      \
       , (hpx::util::functional::detail::async_continuation_impl<              \
             hpx::util::detail::bound_action<                                  \
@@ -59,7 +59,7 @@ namespace hpx { namespace detail
 /**/
 
 #define HPX_REGISTER_ASYNC_COLOCATED(Action, Name)                            \
-    HPX_UTIL_REGISTER_FUNCTION(                                               \
+    HPX_UTIL_REGISTER_UNIQUE_FUNCTION(                                        \
         void (hpx::naming::id_type, hpx::agas::response)                      \
       , (hpx::util::functional::detail::async_continuation_impl<              \
             hpx::util::detail::bound_action<                                  \
@@ -124,7 +124,7 @@ namespace hpx { namespace detail
         typename traits::promise_local_result<
             typename hpx::actions::extract_action<Action>::remote_result_type
         >::type>
-    async_colocated(hpx::actions::continuation_type const& cont,
+    async_colocated(std::unique_ptr<hpx::actions::continuation> cont,
         naming::id_type const& gid, Ts&&... vs)
     {
         // Attach the requested action as a continuation to a resolve_async
@@ -145,7 +145,7 @@ namespace hpx { namespace detail
                 util::bind<Action>(
                     util::bind(util::functional::extract_locality(), _2, gid)
                       , std::forward<Ts>(vs)...)
-                  , cont)
+                  , std::move(cont))
               , service_target, req);
     }
 
@@ -157,11 +157,11 @@ namespace hpx { namespace detail
             typename hpx::actions::extract_action<Derived>::remote_result_type
         >::type>
     async_colocated(
-        hpx::actions::continuation_type const& cont
+        std::unique_ptr<hpx::actions::continuation> cont
       , hpx::actions::basic_action<Component, Signature, Derived> /*act*/
       , naming::id_type const& gid, Ts&&... vs)
     {
-        return async_colocated<Derived>(cont, gid, std::forward<Ts>(vs)...);
+        return async_colocated<Derived>(std::move(cont), gid, std::forward<Ts>(vs)...);
     }
 }}
 

@@ -84,7 +84,7 @@ double benchmark_serialization(std::size_t data_size, std::size_t iterations,
         outp = hpx::parcelset::parcel(here, addr,
             new hpx::actions::transfer_action<test_action>(
                 hpx::threads::thread_priority_normal, buffer),
-            new hpx::actions::typed_continuation<int>(here));
+            std::unique_ptr<hpx::actions::continuation>(new hpx::actions::typed_continuation<int>(here)));
     }
     else {
         outp = hpx::parcelset::parcel(here, addr,

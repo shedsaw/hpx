@@ -452,8 +452,8 @@ namespace hpx { namespace applier
         }
 
         // decode the action-type in the parcel
-        actions::continuation_type cont = p.get_continuation();
-        actions::action_type act = p.get_action();
+        std::unique_ptr<actions::continuation> cont(p.get_continuation());
+        actions::base_action * act = p.get_action();
 
 #if defined(HPX_HAVE_SECURITY)
         // we look up the certificate of the originating locality, no matter
@@ -548,7 +548,7 @@ namespace hpx { namespace applier
                 // which first executes the original thread function as
                 // required by the action and triggers the continuations
                 // afterwards.
-                act->schedule_thread(cont, ids[i], lva, threads::pending);
+                act->schedule_thread(std::move(cont), ids[i], lva, threads::pending);
             }
         }
     }

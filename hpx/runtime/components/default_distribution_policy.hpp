@@ -193,10 +193,10 @@ namespace hpx { namespace components
         ///       this class
         ///
         template <typename Action, typename ...Ts>
-        bool apply(actions::continuation_type const& c,
+        bool apply(std::unique_ptr<actions::continuation> c,
             threads::thread_priority priority, Ts&&... vs) const
         {
-            return hpx::detail::apply_impl<Action>(c,
+            return hpx::detail::apply_impl<Action>(std::move(c),
                 localities_.empty() ? hpx::find_here() : localities_.front(),
                 priority, std::forward<Ts>(vs)...);
         }
@@ -205,10 +205,10 @@ namespace hpx { namespace components
         ///       this class
         ///
         template <typename Action, typename Callback, typename ...Ts>
-        bool apply_cb(actions::continuation_type const& c,
+        bool apply_cb(std::unique_ptr<actions::continuation> c,
             threads::thread_priority priority, Callback&& cb, Ts&&... vs) const
         {
-            return hpx::detail::apply_cb_impl<Action>(c,
+            return hpx::detail::apply_cb_impl<Action>(std::move(c),
                 localities_.empty() ? hpx::find_here() : localities_.front(),
                 priority, std::forward<Callback>(cb), std::forward<Ts>(vs)...);
         }

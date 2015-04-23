@@ -15,29 +15,29 @@ namespace hpx { namespace applier { namespace detail
 {
     // forward declaration only
     template <typename Action, typename ...Ts>
-    bool apply_l_p(actions::continuation_type const& c,
+    bool apply_l_p(std::unique_ptr<actions::continuation> c,
         naming::id_type const& target, naming::address&& addr,
         threads::thread_priority priority, Ts&&... vs);
 
     template <typename Action, typename ...Ts>
-    bool apply_r_p(naming::address&& addr, actions::continuation_type const& c,
+    bool apply_r_p(naming::address&& addr, std::unique_ptr<actions::continuation> c,
         naming::id_type const& id, threads::thread_priority priority,
         Ts&&... vs);
 
     template <typename Action, typename Callback, typename ...Ts>
     bool apply_r_p_cb(naming::address&& addr,
-        actions::continuation_type const& c, naming::id_type const& id,
+        std::unique_ptr<actions::continuation> c, naming::id_type const& id,
         threads::thread_priority priority, Callback && cb, Ts&&... vs);
 }}}
 
 namespace hpx { namespace detail
 {
     template <typename Action, typename ...Ts>
-    bool apply_impl(actions::continuation_type const& c,
+    bool apply_impl(std::unique_ptr<actions::continuation> c,
         hpx::id_type const& id, threads::thread_priority priority, Ts&&... vs);
 
     template <typename Action, typename Callback, typename ...Ts>
-    bool apply_cb_impl(actions::continuation_type const& c,
+    bool apply_cb_impl(std::unique_ptr<actions::continuation> c,
         hpx::id_type const& id, threads::thread_priority priority,
         Callback&& cb, Ts&&... vs);
 }}

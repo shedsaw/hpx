@@ -37,7 +37,7 @@ namespace hpx { namespace detail
         typename traits::promise_local_result<
             typename hpx::actions::extract_action<Action>::remote_result_type
         >::type>
-    async_colocated(hpx::actions::continuation_type const& cont,
+    async_colocated(std::unique_ptr<hpx::actions::continuation> cont,
         naming::id_type const& gid, Ts&&... vs);
 
     template <
@@ -48,7 +48,7 @@ namespace hpx { namespace detail
             typename hpx::actions::extract_action<Derived>::remote_result_type
         >::type>
     async_colocated(
-        hpx::actions::continuation_type const& cont
+        std::unique_ptr<hpx::actions::continuation> cont
       , hpx::actions::basic_action<Component, Signature, Derived> /*act*/
       , naming::id_type const& gid, Ts&&... vs);
 }}

@@ -187,6 +187,7 @@ namespace hpx { namespace util
 
     private:
         friend class hpx::serialization::access;
+        friend struct traits::serialize_as_future<unique_function>;
 
         void load(IArchive& ar, const unsigned version)
         {

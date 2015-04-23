@@ -150,9 +150,9 @@ namespace hpx { namespace actions
         template <typename Action>
         struct action_registration
         {
-            static boost::shared_ptr<base_action> create()
+            static base_action *create()
             {
-                return boost::shared_ptr<base_action>(new Action());
+                return new Action();
             }
 
             action_registration()
@@ -197,7 +197,7 @@ namespace hpx { namespace actions
     ///////////////////////////////////////////////////////////////////////////
     /// The \a base_action class is an abstract class used as the base class
     /// for all action types. It's main purpose is to allow polymorphic
-    /// serialization of action instances through a shared_ptr.
+    /// serialization of action instances through a pointer.
     struct base_action
     {
         /// The type of an action defines whether this action will be executed
@@ -255,7 +255,7 @@ namespace hpx { namespace actions
         ///       thread function for an action which has to be invoked with
         ///       continuations.
         virtual threads::thread_function_type
-            get_thread_function(continuation_type& cont,
+            get_thread_function(std::unique_ptr<continuation> cont,
                 naming::address::address_type lva) = 0;
 
         /// return the id of the locality of the parent thread
@@ -295,7 +295,7 @@ namespace hpx { namespace actions
 //             naming::address::address_type lva, threads::thread_init_data& data) = 0;
 //
 //         virtual threads::thread_init_data&
-//         get_thread_init_data(continuation_type& cont,
+//         get_thread_init_data(std::unique_ptr<continuation> cont,
 //             naming::id_type const& target, naming::address::address_type lva,
 //             threads::thread_init_data& data) = 0;
 
@@ -304,7 +304,7 @@ namespace hpx { namespace actions
             naming::address::address_type lva,
             threads::thread_state_enum initial_state) = 0;
 
-        virtual void schedule_thread(continuation_type& cont,
+        virtual void schedule_thread(std::unique_ptr<continuation> cont,
             naming::id_type const& target, naming::address::address_type lva,
             threads::thread_state_enum initial_state) = 0;
 

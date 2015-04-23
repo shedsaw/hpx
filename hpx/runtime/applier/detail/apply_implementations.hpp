@@ -17,7 +17,7 @@
 namespace hpx { namespace detail
 {
     template <typename Action, typename ...Ts>
-    bool apply_impl(actions::continuation_type const& c, hpx::id_type const& id,
+    bool apply_impl(std::unique_ptr<actions::continuation> c, hpx::id_type const& id,
         threads::thread_priority priority, Ts&&... vs)
     {
         if (!traits::action_is_target_valid<Action>::call(id)) {
@@ -32,16 +32,16 @@ namespace hpx { namespace detail
         naming::address addr;
         if (agas::is_local_address_cached(id, addr)) {
             return applier::detail::apply_l_p<Action>(
-                c, id, std::move(addr), priority, std::forward<Ts>(vs)...);
+                std::move(c), id, std::move(addr), priority, std::forward<Ts>(vs)...);
         }
 
         // apply remotely
-        return applier::detail::apply_r_p<Action>(std::move(addr), c, id,
+        return applier::detail::apply_r_p<Action>(std::move(addr), std::move(c), id,
             priority, std::forward<Ts>(vs)...);
     }
 
     template <typename Action, typename Callback, typename ...Ts>
-    bool apply_cb_impl(actions::continuation_type const& c, hpx::id_type const& id,
+    bool apply_cb_impl(std::unique_ptr<actions::continuation> c, hpx::id_type const& id,
         threads::thread_priority priority, Callback&& cb, Ts&&... vs)
     {
         if (!traits::action_is_target_valid<Action>::call(id)) {
@@ -57,7 +57,7 @@ namespace hpx { namespace detail
         if (agas::is_local_address_cached(id, addr)) {
             // apply locally
             bool result = applier::detail::apply_l_p<Action>(
-                c, id, std::move(addr), priority, std::forward<Ts>(vs)...);
+                std::move(c), id, std::move(addr), priority, std::forward<Ts>(vs)...);
 
             // invoke callback
             cb(boost::system::error_code(), parcelset::parcel());
@@ -65,7 +65,7 @@ namespace hpx { namespace detail
         }
 
         // apply remotely
-        return applier::detail::apply_r_p_cb<Action>(std::move(addr), c, id,
+        return applier::detail::apply_r_p_cb<Action>(std::move(addr), std::move(c), id,
             priority, std::forward<Callback>(cb), std::forward<Ts>(vs)...);
     }
 }}

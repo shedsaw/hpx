@@ -107,11 +107,11 @@ namespace hpx { namespace util
             static BOOST_FORCEINLINE
             type call(
                 detail::pack_c<std::size_t, Is...>
-              , hpx::actions::continuation_type const& cont
+              , std::unique_ptr<hpx::actions::continuation> cont
               , BoundArgs& bound_args, UnboundArgs&& unbound_args
             )
             {
-                return hpx::apply<Action>(cont, bind_eval<Action>(
+                return hpx::apply<Action>(std::move(cont), bind_eval<Action>(
                     util::get<Is>(bound_args),
                     std::forward<UnboundArgs>(unbound_args))...);
             }
@@ -120,7 +120,7 @@ namespace hpx { namespace util
         template <typename Action, typename BoundArgs, typename UnboundArgs>
         BOOST_FORCEINLINE
         bool
-        bind_action_apply_cont2(hpx::actions::continuation_type const& cont,
+        bind_action_apply_cont2(std::unique_ptr<hpx::actions::continuation> cont,
             BoundArgs& bound_args, UnboundArgs&& unbound_args)
         {
             return bind_action_apply_cont_impl2<
@@ -128,7 +128,7 @@ namespace hpx { namespace util
                 >::call(
                     typename detail::make_index_pack<
                         util::tuple_size<BoundArgs>::value
-                    >::type(), cont,
+                    >::type(), std::move(cont),
                     bound_args, std::forward<UnboundArgs>(unbound_args));
         }
 
@@ -232,9 +232,9 @@ namespace hpx { namespace util
             template <typename ...Us>
             BOOST_FORCEINLINE
             bool
-            apply_c(actions::continuation_type const& cont, Us&&... us) const
+            apply_c(std::unique_ptr<actions::continuation> cont, Us&&... us) const
             {
-                return detail::bind_action_apply_cont2<Action>(cont,
+                return detail::bind_action_apply_cont2<Action>(std::move(cont),
                     _bound_args, util::forward_as_tuple(std::forward<Us>(us)...));
             }
 

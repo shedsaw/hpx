@@ -50,20 +50,10 @@ namespace hpx { namespace parcelset
               : count_(0), action_(act)
             {}
 
-            parcel_data(actions::action_type act)
-              : count_(0), action_(act)
-            {}
-
             parcel_data(actions::base_action* act,
-                   actions::continuation* do_after)
+                   std::unique_ptr<actions::continuation> do_after)
               : count_(0),
-                action_(act), continuation_(do_after)
-            {}
-
-            parcel_data(actions::base_action* act,
-                    actions::continuation_type do_after)
-              : count_(0),
-                action_(act), continuation_(do_after)
+                action_(act), continuation_(std::move(do_after))
             {}
 
             virtual ~parcel_data() {}
@@ -121,14 +111,21 @@ namespace hpx { namespace parcelset
                 source_id_ = source_id;
             }
 
-            actions::action_type get_action() const
+            actions::base_action * get_action() const
             {
-                return action_;
+                return action_.get();
             }
 
-            actions::continuation_type get_continuation() const
+            actions::continuation * get_continuation_ref() const
             {
-                return continuation_;
+                HPX_ASSERT(continuation_);
+                return continuation_.get();
+            }
+
+            std::unique_ptr<actions::continuation> get_continuation()
+            {
+                HPX_ASSERT(continuation_);
+                return std::move(continuation_);
             }
 
             threads::thread_priority get_thread_priority() const
@@ -162,8 +159,8 @@ namespace hpx { namespace parcelset
 
         protected:
             naming::id_type source_id_;
-            actions::action_type action_;
-            actions::continuation_type continuation_;
+            std::unique_ptr<actions::base_action> action_;
+            std::unique_ptr<actions::continuation> continuation_;
         };
 
         /// support functions for boost::intrusive_ptr
@@ -211,24 +208,8 @@ namespace hpx { namespace parcelset
 
             single_destination_parcel_data(naming::id_type const& apply_to,
                     naming::address const& addr, actions::base_action* act,
-                   actions::continuation* do_after)
-              : parcel_data(act, do_after)
-              , dest_(apply_to)
-              , addr_(addr)
-            {
-                data_.start_time_ = 0;
-                data_.creation_time_ = 0;
-                data_.has_source_id_ = 0;
-                data_.has_continuation_ = do_after ? 1 : 0;
-
-                HPX_ASSERT(components::types_are_compatible(
-                    act->get_component_type(), addr.type_));
-            }
-
-            single_destination_parcel_data(naming::id_type const& apply_to,
-                    naming::address const& addr, actions::base_action* act,
-                    actions::continuation_type do_after)
-              : parcel_data(act, do_after)
+                    std::unique_ptr<actions::continuation> do_after)
+              : parcel_data(act, std::move(do_after))
               , dest_(apply_to)
               , addr_(addr)
             {
@@ -335,7 +316,7 @@ namespace hpx { namespace parcelset
 
             void wait_for_futures()
             {
-                actions::continuation_type const& cont = this->get_continuation();
+                actions::continuation * cont = this->get_continuation_ref();
                 if (cont)
                     cont->wait_for_futures();
                 this->get_action()->wait_for_futures();
@@ -397,7 +378,7 @@ namespace hpx { namespace parcelset
             multi_destination_parcel_data(
                     std::vector<naming::id_type> const& apply_to,
                     std::vector<naming::address> const& addrs,
-                    actions::action_type act)
+                    actions::base_action *act)
               : parcel_data(act)
               , dests_(apply_to)
               , addrs_(addrs)
@@ -570,7 +551,7 @@ namespace hpx { namespace parcelset
 #if defined(HPX_SUPPORT_MULTIPLE_PARCEL_DESTINATIONS)
         parcel(std::vector<naming::id_type> const& apply_to,
                 std::vector<naming::address> const& addrs,
-                actions::action_type act)
+                actions::base_action *act)
           : data_(new detail::multi_destination_parcel_data(apply_to, addrs, act))
         {
         }
@@ -578,15 +559,8 @@ namespace hpx { namespace parcelset
 
         parcel(naming::id_type const& apply_to,
                 naming::address const& addrs, actions::base_action* act,
-                actions::continuation* do_after)
-          : data_(new detail::single_destination_parcel_data(apply_to, addrs, act, do_after))
-        {
-        }
-
-        parcel(naming::id_type const& apply_to,
-                naming::address const& addrs, actions::base_action* act,
-                actions::continuation_type do_after)
-          : data_(new detail::single_destination_parcel_data(apply_to, addrs, act, do_after))
+                std::unique_ptr<actions::continuation> do_after)
+          : data_(new detail::single_destination_parcel_data(apply_to, addrs, act, std::move(do_after)))
         {
         }
 
@@ -595,14 +569,14 @@ namespace hpx { namespace parcelset
         // default copy constructor is ok
         // default assignment operator is ok
 
-        actions::action_type get_action() const
+        actions::base_action *get_action() const
         {
             return data_->get_action();
         }
 
-        actions::continuation_type get_continuation() const
+        std::unique_ptr<actions::continuation> get_continuation() const
         {
-            return data_->get_continuation();
+            return std::move(data_->get_continuation());
         }
 
         /// get and set the source locality/component id

@@ -23,10 +23,8 @@ namespace hpx
         typedef typename hpx::actions::extract_action<Action>::type action_type;
         typedef typename action_type::result_type result_type;
 
-        return apply<Action>(
-            boost::make_shared<
-                hpx::actions::typed_continuation<result_type>
-            >(std::forward<Cont>(cont)),
+        std::unique_ptr<actions::continuation> c(new hpx::actions::typed_continuation<result_type>(std::forward<Cont>(cont)));
+        return apply<Action>(std::move(c),
             gid, std::forward<Ts>(vs)...);
     }
 
@@ -48,10 +46,8 @@ namespace hpx
         typedef typename hpx::actions::extract_action<Action>::type action_type;
         typedef typename action_type::result_type result_type;
 
-        return apply<Action>(
-            boost::make_shared<
-                hpx::actions::typed_continuation<result_type>
-            >(cont, make_continuation()),
+        std::unique_ptr<actions::continuation> c(new hpx::actions::typed_continuation<result_type>(cont, make_continuation()));
+        return apply<Action>(std::move(c),
             gid, std::forward<Ts>(vs)...);
     }
 

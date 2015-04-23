@@ -41,7 +41,7 @@ namespace hpx
     template <typename Component, typename Signature, typename Derived,
         typename ...Ts>
     inline bool
-    apply(hpx::actions::continuation_type const& c,
+    apply(std::unique_ptr<hpx::actions::continuation> c,
         hpx::actions::basic_action<Component, Signature, Derived>,
         naming::id_type const& contgid, naming::id_type const& gid,
         Ts&&... vs);
@@ -128,9 +128,9 @@ namespace hpx { namespace actions
         template <typename Continuation>
         struct continuation_registration
         {
-            static boost::shared_ptr<continuation> create()
+            static continuation *create()
             {
-                return boost::shared_ptr<continuation>(new Continuation());
+                return new Continuation();
             }
 
             continuation_registration()
@@ -420,7 +420,7 @@ namespace hpx { namespace actions
     struct typed_continuation : continuation
     {
     private:
-        typedef util::function<void(naming::id_type, Result)> function_type;
+        typedef util::unique_function<void(naming::id_type, Result)> function_type;
 
     public:
         typed_continuation()
@@ -546,7 +546,7 @@ namespace hpx { namespace actions
     struct typed_continuation<void> : continuation
     {
     private:
-        typedef util::function<void(naming::id_type)> function_type;
+        typedef util::unique_function<void(naming::id_type)> function_type;
 
     public:
         typed_continuation()

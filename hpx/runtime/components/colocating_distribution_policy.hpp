@@ -156,33 +156,33 @@ namespace hpx { namespace components
         ///       this class
         ///
         template <typename Action, typename ...Ts>
-        bool apply(actions::continuation_type const& c,
+        bool apply(std::unique_ptr<actions::continuation> c,
             threads::thread_priority priority, Ts&&... vs) const
         {
             if (!id_)
             {
-                return hpx::detail::apply_impl<Action>(c, hpx::find_here(),
+                return hpx::detail::apply_impl<Action>(std::move(c), hpx::find_here(),
                     priority, std::forward<Ts>(vs)...);
             }
             return hpx::detail::apply_colocated<Action>(
-                c, id_, std::forward<Ts>(vs)...);
+                std::move(c), id_, std::forward<Ts>(vs)...);
         }
 
         /// \note This function is part of the invocation policy implemented by
         ///       this class
         ///
         template <typename Action, typename Callback, typename ...Ts>
-        bool apply_cb(actions::continuation_type const& c,
+        bool apply_cb(std::unique_ptr<actions::continuation> c,
             threads::thread_priority priority, Callback&& cb, Ts&&... vs) const
         {
             if (!id_)
             {
                 return hpx::detail::apply_cb_impl<Action>(
-                    c, hpx::find_here(), priority, std::forward<Callback>(cb),
+                    std::move(c), hpx::find_here(), priority, std::forward<Callback>(cb),
                     std::forward<Ts>(vs)...);
             }
             return hpx::detail::apply_colocated_cb<Action>(
-                c, id_, std::forward<Callback>(cb), std::forward<Ts>(vs)...);
+                std::move(c), id_, std::forward<Callback>(cb), std::forward<Ts>(vs)...);
         }
 
         /// \cond NOINTERNAL

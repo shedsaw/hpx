@@ -461,10 +461,10 @@ namespace hpx
     namespace actions
     {
         struct HPX_API_EXPORT base_action;
-        typedef boost::shared_ptr<base_action> action_type;
+        //typedef std::unique_ptr<base_action> action_type;
 
         class HPX_API_EXPORT continuation;
-        typedef boost::shared_ptr<continuation> continuation_type;
+        //typedef boost::shared_ptr<continuation> continuation_type;
 
         class HPX_API_EXPORT action_manager;
 

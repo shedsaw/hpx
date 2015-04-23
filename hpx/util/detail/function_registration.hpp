@@ -71,9 +71,9 @@ namespace hpx { namespace util { namespace detail
     {
         typedef boost::shared_ptr<function_registration_info_base> pointer_type;
 
-        static pointer_type create()
+        static function_registration_info_base *create()
         {
-            return pointer_type(new function_registration_info<VTable, T>());
+            return new function_registration_info<VTable, T>();
         }
 
         function_registration()

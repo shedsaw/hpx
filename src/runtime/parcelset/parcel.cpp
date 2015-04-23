@@ -66,8 +66,8 @@ namespace hpx { namespace parcelset
             std::string action_name;
             ar >> action_name;
 
-            action_ = util::polymorphic_factory<
-                actions::base_action>::create(action_name);
+            action_.reset(util::polymorphic_factory<
+                actions::base_action>::create(action_name));
             action_->load(ar);
 
             // handle continuation.
@@ -75,8 +75,8 @@ namespace hpx { namespace parcelset
                 std::string continuation_name;
                 ar >> continuation_name;
 
-                continuation_ = util::polymorphic_factory<
-                    actions::continuation>::create(continuation_name);
+                continuation_.reset(util::polymorphic_factory<
+                    actions::continuation>::create(continuation_name));
                 continuation_->load(ar);
             }
         }
