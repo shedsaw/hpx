@@ -264,12 +264,6 @@ namespace hpx { namespace actions
             return traits::action_may_require_id_splitting<derived_type>::call(arguments_);
         }
 
-        /// Wait for embedded futures to become ready
-        void wait_for_futures()
-        {
-            traits::serialize_as_future<arguments_type>::call(arguments_);
-        }
-
         /// Return whether the embedded action is part of termination detection
         bool does_termination_detection() const
         {

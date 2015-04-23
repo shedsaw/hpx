@@ -128,9 +128,6 @@ namespace hpx { namespace traits
     struct is_future_tuple;
 
     template <typename Future, typename Enable = void>
-    struct serialize_as_future;
-
-    template <typename Future, typename Enable = void>
     struct acquire_future;
 
     ///////////////////////////////////////////////////////////////////////////

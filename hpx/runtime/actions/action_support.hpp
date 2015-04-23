@@ -286,9 +286,6 @@ namespace hpx { namespace actions
         virtual void load(serialization::input_archive & ar) = 0;
         virtual void save(serialization::output_archive & ar) const = 0;
 
-        /// Wait for embedded futures to become ready
-        virtual void wait_for_futures() = 0;
-
 //         /// Return all data needed for thread initialization
 //         virtual threads::thread_init_data&
 //         get_thread_init_data(naming::id_type const& target,

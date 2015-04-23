@@ -20,7 +20,6 @@
 #include <hpx/runtime/serialization/serialize.hpp>
 #include <hpx/util/assert.hpp>
 #include <hpx/traits/type_size.hpp>
-#include <hpx/traits/serialize_as_future.hpp>
 
 #include <boost/intrusive_ptr.hpp>
 #include <boost/detail/atomic_count.hpp>
@@ -101,8 +100,6 @@ namespace hpx { namespace parcelset
             virtual bool may_require_id_splitting() const = 0;
 
             virtual bool does_termination_detection() const = 0;
-
-            virtual void wait_for_futures() = 0;
 
             // default copy constructor is ok
             // default assignment operator is ok
@@ -331,14 +328,6 @@ namespace hpx { namespace parcelset
             bool does_termination_detection() const
             {
                 return this->get_action()->does_termination_detection();
-            }
-
-            void wait_for_futures()
-            {
-                actions::continuation_type const& cont = this->get_continuation();
-                if (cont)
-                    cont->wait_for_futures();
-                this->get_action()->wait_for_futures();
             }
 
             void save(serialization::output_archive& ar) const;
@@ -731,11 +720,6 @@ namespace hpx { namespace parcelset
             return data_->does_termination_detection();
         }
 
-        void wait_for_futures()
-        {
-            return data_->wait_for_futures();
-        }
-
         // generate unique parcel id
         static naming::gid_type generate_unique_id(
             boost::uint32_t locality_id = naming::invalid_locality_id);
@@ -768,21 +752,6 @@ namespace hpx { namespace traits
         static std::size_t call(hpx::parcelset::parcel const& p, int flags)
         {
             return sizeof(hpx::parcelset::parcel) + p.get_type_size(flags);
-        }
-    };
-
-    template <>
-    struct serialize_as_future<hpx::parcelset::parcel>
-      : boost::mpl::true_
-    {
-        static bool call_if(hpx::parcelset::parcel& r)
-        {
-            return true;
-        }
-
-        static void call(hpx::parcelset::parcel& p)
-        {
-            p.wait_for_futures();
         }
     };
 }}

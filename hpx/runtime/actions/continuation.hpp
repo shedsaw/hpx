@@ -17,7 +17,6 @@
 #include <hpx/util/demangle_helper.hpp>
 #include <hpx/traits/is_action.hpp>
 #include <hpx/traits/is_callable.hpp>
-#include <hpx/traits/serialize_as_future.hpp>
 
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/type_traits/remove_reference.hpp>
@@ -224,9 +223,6 @@ namespace hpx { namespace actions
             return gid_;
         }
 
-        virtual bool has_to_wait_for_futures() = 0;
-        virtual void wait_for_futures() = 0;
-
     protected:
         naming::id_type gid_;
     };
@@ -320,16 +316,6 @@ namespace hpx { namespace actions
             return std::move(t);
         }
 
-        virtual bool has_to_wait_for_futures()
-        {
-            return traits::serialize_as_future<cont_type>::call_if(cont_);
-        }
-
-        virtual void wait_for_futures()
-        {
-            traits::serialize_as_future<cont_type>::call(cont_);
-        }
-
     private:
         // serialization support
         friend class hpx::serialization::access;
@@ -382,18 +368,6 @@ namespace hpx { namespace actions
             // Yep, 't' is a zombie, however we don't use the returned value
             // anyways. We need it for result type calculation, though.
             return std::move(t);
-        }
-
-        virtual bool has_to_wait_for_futures()
-        {
-            return traits::serialize_as_future<cont_type>::call_if(cont_) ||
-                traits::serialize_as_future<function_type>::call_if(f_);
-        }
-
-        virtual void wait_for_futures()
-        {
-            traits::serialize_as_future<cont_type>::call(cont_);
-            traits::serialize_as_future<function_type>::call(f_);
         }
 
     private:
@@ -472,16 +446,6 @@ namespace hpx { namespace actions
             else {
                 f_(this->get_gid(), std::move(result));
             }
-        }
-
-        virtual bool has_to_wait_for_futures()
-        {
-            return traits::serialize_as_future<function_type>::call_if(f_);
-        }
-
-        virtual void wait_for_futures()
-        {
-            traits::serialize_as_future<function_type>::call(f_);
         }
 
     private:
@@ -603,16 +567,6 @@ namespace hpx { namespace actions
         virtual void trigger_value(util::unused_type &&) const
         {
             this->trigger();
-        }
-
-        virtual bool has_to_wait_for_futures()
-        {
-            return traits::serialize_as_future<function_type>::call_if(f_);
-        }
-
-        virtual void wait_for_futures()
-        {
-            traits::serialize_as_future<function_type>::call(f_);
         }
 
     private:

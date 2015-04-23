@@ -228,9 +228,8 @@ namespace hpx { namespace lcos { namespace detail
     {
         typedef typename traits::future_traits<Future>::result_type value_type;
 
-        if(f.valid())
+        if (f.valid())
         {
-            HPX_ASSERT(f.is_ready());
             f.wait();
         }
 
@@ -255,9 +254,8 @@ namespace hpx { namespace lcos { namespace detail
         boost::is_void<typename traits::future_traits<Future>::type>
     >::type serialize_future_save(Archive& ar, Future const& f) //-V659
     {
-        if(f.valid())
+        if (f.valid())
         {
-            HPX_ASSERT(f.is_ready());
             f.wait();
         }
 
@@ -1335,16 +1333,6 @@ namespace hpx { namespace actions
                     util::placeholders::_1));
         }
 
-        virtual bool has_to_wait_for_futures()
-        {
-            return traits::serialize_as_future<function_type>::call_if(f_);
-        }
-
-        virtual void wait_for_futures()
-        {
-            traits::serialize_as_future<function_type>::call(f_);
-        }
-
     private:
         char const* get_continuation_name() const
         {
@@ -1457,16 +1445,6 @@ namespace hpx { namespace actions
                     util::placeholders::_1));
         }
 
-        virtual bool has_to_wait_for_futures()
-        {
-            return traits::serialize_as_future<function_type>::call_if(f_);
-        }
-
-        virtual void wait_for_futures()
-        {
-            traits::serialize_as_future<function_type>::call(f_);
-        }
-
     private:
         char const* get_continuation_name() const
         {
@@ -1575,16 +1553,6 @@ namespace hpx { namespace actions
                     boost::static_pointer_cast<typed_continuation const>(
                         shared_from_this()),
                     util::placeholders::_1));
-        }
-
-        virtual bool has_to_wait_for_futures()
-        {
-            return traits::serialize_as_future<function_type>::call_if(f_);
-        }
-
-        virtual void wait_for_futures()
-        {
-            traits::serialize_as_future<function_type>::call(f_);
         }
 
     private:
@@ -1699,16 +1667,6 @@ namespace hpx { namespace actions
                     util::placeholders::_1));
         }
 
-        virtual bool has_to_wait_for_futures()
-        {
-            return traits::serialize_as_future<function_type>::call_if(f_);
-        }
-
-        virtual void wait_for_futures()
-        {
-            traits::serialize_as_future<function_type>::call(f_);
-        }
-
     private:
         char const* get_continuation_name() const
         {
@@ -1760,40 +1718,6 @@ namespace hpx { namespace serialization
     {
         hpx::lcos::detail::serialize_future(ar, f, version);
     }
-}}
-
-namespace hpx { namespace traits
-{
-    ///////////////////////////////////////////////////////////////////////////
-    template <typename R>
-    struct serialize_as_future<lcos::future<R> >
-      : boost::mpl::false_
-    {
-        static bool call_if(lcos::future<R>& f)
-        {
-            return f.valid() && !f.is_ready();
-        }
-
-        static void call(lcos::future<R>& f)
-        {
-            f.wait();
-        }
-    };
-
-    template <typename R>
-    struct serialize_as_future<lcos::shared_future<R> >
-      : boost::mpl::true_
-    {
-        static bool call_if(lcos::shared_future<R>& f)
-        {
-            return f.valid() && !f.is_ready();
-        }
-
-        static void call(lcos::shared_future<R>& f)
-        {
-            f.wait();
-        }
-    };
 }}
 
 #include <hpx/lcos/local/packaged_continuation.hpp>
